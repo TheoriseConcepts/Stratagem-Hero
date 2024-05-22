@@ -2,6 +2,8 @@
 
 A python (pygame) recreation of the Stratagem Hero game included with the Super Citizen Edition of Helldivers 2.
 
+Play Web Version Here [Stratagem-Hero](https://https://theoriseconcepts.github.io/Stratagem-Hero/index.html)
+
 ## Updates
 
 - Open to suggestions and improvements to both code and game logic
