@@ -1,5 +1,6 @@
 import pygame
 import os
+import asyncio
 from initial_variables import variables
 from load_assets import game_over, high_scores_file
 
@@ -12,7 +13,6 @@ def reset_round_timer(remaining_time, completed_stratagem_length):
     remaining_time += 0.1 * completed_stratagem_length
     remaining_time = min(remaining_time, variables.round_time_limit)
     return remaining_time
-
 
 def load_high_scores(file_path):
     if not os.path.exists(file_path):
@@ -34,7 +34,7 @@ def save_high_scores(file_path, scores):
         for name, score in scores:
             file.write(f"{name},{score}\n")
 
-def get_player_name(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT):
+async def get_player_name(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT):
     clock = pygame.time.Clock()
     input_box = pygame.Rect(WIDTH / 2 - 100, HEIGHT / 2, 200, 60)
     color_active = pygame.Color('yellow')
@@ -72,23 +72,24 @@ def get_player_name(window, background, main_font, sub_font, WHITE, YELLOW, WIDT
         
         pygame.display.flip()
         clock.tick(30)
+        await asyncio.sleep(0)
     
     return text
 
 def check_and_update_high_scores(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT, file_path, score_count):
     scores = load_high_scores(file_path)
     if len(scores) < 3 or score_count > scores[-1][1]:
-        name = get_player_name(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT)
+        name = asyncio.run(get_player_name(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT))
         scores.append((name, score_count))
         scores.sort(key=lambda x: x[1], reverse=True)
         save_high_scores(file_path, scores[:3])
 
-def round_timeout(window, background, score_count, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT, restart_callback):
+async def round_timeout(window, background, score_count, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT, restart_callback):
     
     game_over.play()
     run = True
     
-    check_and_update_high_scores(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT, high_scores_file, score_count)
+    #check_and_update_high_scores(window, background, main_font, sub_font, WHITE, YELLOW, WIDTH, HEIGHT, high_scores_file, score_count)
     high_scores = load_high_scores(high_scores_file)
     
     start_time = pygame.time.get_ticks()
@@ -111,6 +112,7 @@ def round_timeout(window, background, score_count, main_font, sub_font, WHITE, Y
         window.blit(round_text_c, (WIDTH / 2 - round_text_c.get_width() / 2, 700))
         window.blit(round_text_d, (WIDTH / 2 - round_text_d.get_width() / 2, 775))
         pygame.display.update()
+        await asyncio.sleep(0)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -119,6 +121,7 @@ def round_timeout(window, background, score_count, main_font, sub_font, WHITE, Y
             
         if pygame.time.get_ticks() - start_time > 5000:
             run = False
-            restart_callback()
+            await restart_callback()
+        
             
     pygame.quit()

@@ -1,10 +1,15 @@
 import pygame
 import random
+import time
 from initial_variables import variables
 from stratagems import Stratagems
-from load_assets import icon_select, background, sub_font, load_arrow_images
+from load_assets import icon_select, background, sub_font, arrow_images
 
 def display_new_stratagem(stratagems_per_round):
+    
+    current_time = int(time.time())
+    random.seed(current_time)
+    
     stratagem_categories = list(Stratagems.keys())
     stratagem_category = []
     stratagems_for_round = []
@@ -59,7 +64,6 @@ def display_stratagem_queue(window, icons_for_round):
             current_x += variables.small_icon_size + variables.icon_spacing
             
 def input_display(window, stratagem, input_index, incorrect_input):
-    arrow_images = load_arrow_images()
     input_start_pos = variables.WIDTH / 2 - (len(stratagem.inputs) * arrow_images['right'].get_width()) // 2
     for i, input in enumerate(stratagem.inputs):
         if i < input_index:

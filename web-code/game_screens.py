@@ -1,6 +1,7 @@
 import pygame
+import asyncio
 from initial_variables import variables
-from load_assets import background, main_font, sub_font, round_track, background_track, score_track, key_press, key_press_fail
+from load_assets import background, main_font, sub_font, round_track, background_track, select_score_track, key_press, key_press_fail
 from game_logic import display_new_stratagem, render_static_elements, display_stratagem_queue, input_display, create_progress_bar
 from round_manager import start_round_timer, round_timeout, reset_round_timer
 
@@ -14,7 +15,7 @@ def start_screen():
     window.blit(subtitle, (variables.WIDTH / 2 - subtitle.get_width() / 2, variables.HEIGHT / 1.49))
     pygame.display.update()
     
-def round_screen(round_count, stratagems_per_round, score_count):
+async def round_screen(round_count, stratagems_per_round, score_count):
     
     if round_count > 1:
        
@@ -32,6 +33,7 @@ def round_screen(round_count, stratagems_per_round, score_count):
         window.blit(round_subtitle, (variables.WIDTH / 2 - round_subtitle.get_width() / 2, variables.HEIGHT / 1.54))
         window.blit(round_number, (variables.WIDTH / 2 - round_number.get_width() / 2, variables.HEIGHT / 1.42))
         pygame.display.update()
+        await asyncio.sleep(0)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -39,11 +41,13 @@ def round_screen(round_count, stratagems_per_round, score_count):
                 return False
 
         if pygame.time.get_ticks() - start_time > 1500:
-            game_screen(round_count, stratagems_per_round, remaining_time, score_count)
+            asyncio.run(game_screen(round_count, stratagems_per_round, remaining_time, score_count))
             return False
         
-def score_window(round_count, stratagems_per_round, score_count, current_remaining_time, perfect_round):
+        
+async def score_window(round_count, stratagems_per_round, score_count, current_remaining_time, perfect_round):
     
+    score_track = select_score_track()
     score_track.play()
     
     start_time = pygame.time.get_ticks()
@@ -70,6 +74,7 @@ def score_window(round_count, stratagems_per_round, score_count, current_remaini
                 window.blit(number, (variables.WIDTH - 400 - number.get_width(), 400 + i * 100))
 
         pygame.display.update()
+        await asyncio.sleep(0)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -77,12 +82,13 @@ def score_window(round_count, stratagems_per_round, score_count, current_remaini
                 return False
 
         if current_time - start_time > 4000:
-            round_screen(round_count, stratagems_per_round, score_count)
+            asyncio.run(round_screen(round_count, stratagems_per_round, score_count))
             return False
         
-def game_screen(round_count, stratagems_per_round, remaining_time, score_count):
+        
+async def game_screen(round_count, stratagems_per_round, remaining_time, score_count):
     
-    background_track.play()
+    #background_track.play()
    
     stratagem_categories, stratagems_for_round, icons_for_round = display_new_stratagem(stratagems_per_round)
     stratagem = stratagems_for_round[0]
@@ -110,7 +116,7 @@ def game_screen(round_count, stratagems_per_round, remaining_time, score_count):
         if current_remaining_time <= 0:
             background_track.stop()
             from main import main
-            round_timeout(window, background, score_count, main_font, sub_font, variables.WHITE, variables.YELLOW, variables.WIDTH, variables.HEIGHT, main)
+            asyncio.run(round_timeout(window, background, score_count, main_font, sub_font, variables.WHITE, variables.YELLOW, variables.WIDTH, variables.HEIGHT, main))
             return False
 
         if incorrect_input and pygame.time.get_ticks() - flash_time > 200:
@@ -135,14 +141,12 @@ def game_screen(round_count, stratagems_per_round, remaining_time, score_count):
                     user_input.append('right')
 
                 if user_input and user_input[input_index] == stratagem.inputs[input_index]:
-                    
-                    key_press.set_volume(0.2)
-                    key_press.play()
+                    #key_press.stop()
+                    #key_press.play()
                     input_index += 1
                 else:
                     
-                    key_press_fail.set_volume(0.2)
-                    key_press_fail.play()
+                    #key_press_fail.play()
                     incorrect_input = True
                     perfect_round = False
                     flash_time = pygame.time.get_ticks()
@@ -167,7 +171,8 @@ def game_screen(round_count, stratagems_per_round, remaining_time, score_count):
                         round_count += 1
                         stratagems_per_round += 1
                         completed_stratagems = 0
-                        score_window(round_count, stratagems_per_round, score_count, current_remaining_time, perfect_round)
+                        asyncio.run(score_window(round_count, stratagems_per_round, score_count, current_remaining_time, perfect_round))
                         return False
 
         pygame.display.update()
+        await asyncio.sleep(0)
