@@ -9,6 +9,7 @@ Play Web Version Here [Stratagem-Hero](https://https://theoriseconcepts.github.i
 - Open to suggestions and improvements to both code and game logic
 - Selectable Gamemodes
 - Online Leaderboard
+- View web version specifc updates here [Stratagem-Hero Web](https://github.com/TheoriseConcepts/TheoriseConcepts.github.io/tree/main)
 
 ## Credits
 
